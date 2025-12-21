@@ -11,6 +11,7 @@ Transform your markdown files into a stunning documentation site with zero confi
 - 🌓 **Dark Mode** - Comfortable reading in any lighting
 - 💻 **Syntax Highlighting** - Beautiful code highlighting for 100+ languages
 - 🔢 **Math Equations** - LaTeX rendering with KaTeX
+- 📊 **Mermaid Diagrams** - Flowcharts, sequence diagrams, ER diagrams, and more
 - 📱 **Fully Responsive** - Perfect on any device
 - ♿ **Accessible** - WCAG 2.1 AA compliant
 - 🚀 **Zero Configuration** - Just add markdown files
@@ -108,6 +109,21 @@ $$
 $$
 ```
 
+#### Mermaid Diagrams
+
+Create flowcharts, sequence diagrams, ER diagrams, and more:
+
+```markdown
+```mermaid
+flowchart TD
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Action 1]
+    B -->|No| D[Action 2]
+    C --> E[End]
+    D --> E
+```
+```
+
 #### Tables
 
 ```markdown
@@ -190,6 +206,7 @@ mdvault/
 - **markdown-it** - Markdown parser
 - **KaTeX** - Math rendering
 - **Highlight.js** - Code syntax highlighting
+- **Mermaid** - Diagram rendering
 
 ## Browser Support
 

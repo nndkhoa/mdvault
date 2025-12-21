@@ -306,6 +306,27 @@
   padding: 0;
 }
 
+/* Mermaid Diagrams */
+.markdown-body .mermaid {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  text-align: center;
+  border: 1px solid var(--border-primary);
+}
+
+.markdown-body .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ensure Mermaid diagrams are accessible */
+.markdown-body .mermaid[role="img"] {
+  display: block;
+}
+
 /* Responsive Typography */
 @media (max-width: 768px) {
   .markdown-body h1 {

@@ -66,6 +66,11 @@ const pageTitle = title ? `${title} - MDVault` : "MDVault";
       is:inline
       src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.10.0/build/highlight.min.js"
     ></script>
+    <!-- Mermaid for diagram rendering -->
+    <script
+      is:inline
+      src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"
+    ></script>
     <script is:inline>
       // Update highlight.js theme based on app theme
       function updateHighlightTheme() {
@@ -82,12 +87,142 @@ const pageTitle = title ? `${title} - MDVault` : "MDVault";
         }
       }
 
+      // Get Mermaid theme based on app theme
+      function getMermaidTheme() {
+        const theme = document.documentElement.getAttribute("data-theme");
+        if (theme === "dark") {
+          return "dark";
+        } else if (theme === "sepia") {
+          return "default"; // Sepia uses default theme
+        } else {
+          return "default";
+        }
+      }
+
+      // Initialize Mermaid diagrams
+      function initMermaid() {
+        if (typeof mermaid === "undefined") {
+          return; // Mermaid library not loaded
+        }
+
+        // Configure Mermaid
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: getMermaidTheme(),
+          securityLevel: "loose",
+          fontFamily: "inherit",
+        });
+
+        // Find all mermaid code blocks and convert them
+        const mermaidBlocks = document.querySelectorAll("pre code.language-mermaid");
+        
+        if (mermaidBlocks.length === 0) {
+          return; // No mermaid blocks found
+        }
+
+        // Use Intersection Observer for lazy loading
+        const mermaidObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const element = entry.target;
+              mermaidObserver.unobserve(element);
+              renderMermaidBlock(element);
+            }
+          });
+        }, {
+          rootMargin: "50px", // Start loading slightly before visible
+        });
+
+        mermaidBlocks.forEach((block) => {
+          mermaidObserver.observe(block);
+        });
+      }
+
+      // Render a single mermaid block
+      function renderMermaidBlock(codeBlock) {
+        try {
+          const mermaidCode = codeBlock.textContent || "";
+          const preElement = codeBlock.parentElement;
+          
+          if (!preElement || !mermaidCode.trim()) {
+            return;
+          }
+
+          // Create a unique ID for this diagram
+          const id = "mermaid-" + Math.random().toString(36).substr(2, 9);
+          
+          // Create new div for Mermaid
+          const mermaidDiv = document.createElement("div");
+          mermaidDiv.className = "mermaid";
+          mermaidDiv.id = id;
+          mermaidDiv.textContent = mermaidCode;
+          mermaidDiv.setAttribute("role", "img");
+          mermaidDiv.setAttribute("aria-label", "Mermaid diagram");
+
+          // Replace the pre element with mermaid div
+          preElement.replaceWith(mermaidDiv);
+
+          // Render the diagram
+          mermaid.run({
+            nodes: [mermaidDiv],
+          }).catch((error) => {
+            console.error("Mermaid rendering error:", error);
+            // On error, restore the original code block
+            const fallbackPre = document.createElement("pre");
+            const fallbackCode = document.createElement("code");
+            fallbackCode.className = "language-mermaid";
+            fallbackCode.textContent = mermaidCode;
+            fallbackPre.appendChild(fallbackCode);
+            mermaidDiv.replaceWith(fallbackPre);
+          });
+        } catch (error) {
+          console.error("Mermaid initialization error:", error);
+        }
+      }
+
+      // Update Mermaid theme when app theme changes
+      function updateMermaidTheme() {
+        if (typeof mermaid === "undefined") {
+          return;
+        }
+
+        const theme = getMermaidTheme();
+        const mermaidDiagrams = document.querySelectorAll(".mermaid");
+        
+        if (mermaidDiagrams.length > 0) {
+          // Re-render all diagrams with new theme
+          mermaid.initialize({
+            startOnLoad: false,
+            theme: theme,
+            securityLevel: "loose",
+            fontFamily: "inherit",
+          });
+
+          mermaidDiagrams.forEach((diagram) => {
+            const mermaidCode = diagram.textContent || "";
+            if (mermaidCode.trim()) {
+              mermaid.run({
+                nodes: [diagram],
+              }).catch((error) => {
+                console.error("Mermaid theme update error:", error);
+              });
+            }
+          });
+        }
+      }
+
       // Initialize highlight.js and set theme
       document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll("pre code").forEach((block) => {
+        // Initialize highlight.js
+        document.querySelectorAll("pre code:not(.language-mermaid)").forEach((block) => {
           hljs.highlightElement(block);
         });
         updateHighlightTheme();
+
+        // Initialize Mermaid (with delay to ensure library is loaded)
+        setTimeout(() => {
+          initMermaid();
+        }, 100);
       });
 
       // Watch for theme changes
@@ -95,6 +230,7 @@ const pageTitle = title ? `${title} - MDVault` : "MDVault";
         mutations.forEach((mutation) => {
           if (mutation.attributeName === "data-theme") {
             updateHighlightTheme();
+            updateMermaidTheme();
           }
         });
       });

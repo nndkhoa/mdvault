@@ -11,6 +11,7 @@ MDVault provides everything you need to transform your markdown files into a pro
 - **GitHub Flavored Markdown** - Full GFM support including tables, strikethrough, and autolinks
 - **Syntax Highlighting** - Beautiful code highlighting for 100+ languages
 - **Math Equations** - Render LaTeX equations with KaTeX
+- **Mermaid Diagrams** - Create flowcharts, sequence diagrams, ER diagrams, and more
 - **Clean URLs** - No `.md` extensions in your URLs
 
 ### Beautiful Design
@@ -56,6 +57,20 @@ $$
 \int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
 $$
 
+## Example Mermaid Diagram
+
+```mermaid
+flowchart LR
+    A[Markdown Files] --> B[MDVault]
+    B --> C[Beautiful Site]
+    C --> D[GitHub Pages]
+    
+    style A fill:#e1f5ff
+    style B fill:#b3e5fc
+    style C fill:#81d4fa
+    style D fill:#4fc3f7
+```
+
 ## Example Table
 
 | Feature | Status |
@@ -63,6 +78,7 @@ $$
 | Markdown Rendering | ✅ |
 | Syntax Highlighting | ✅ |
 | Math Equations | ✅ |
+| Mermaid Diagrams | ✅ |
 | Dark Mode | ✅ |
 | Responsive Design | ✅ |
 
