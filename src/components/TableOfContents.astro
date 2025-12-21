@@ -33,21 +33,21 @@ function renderTOCItem(item: TOCItem) {
             const tocItem = renderTOCItem(item);
             return (
               <li class="toc-item">
-                <a href={`#${item.id}`} class="toc-link">
+                <a href={`#${item.id}`} class="toc-link" data-toc-id={item.id}>
                   {item.text}
                 </a>
                 {tocItem.hasChildren && (
                   <ul class="toc-list toc-nested">
                     {item.children.map((child) => (
                       <li class="toc-item">
-                        <a href={`#${child.id}`} class="toc-link">
+                        <a href={`#${child.id}`} class="toc-link" data-toc-id={child.id}>
                           {child.text}
                         </a>
                         {child.children && child.children.length > 0 && (
                           <ul class="toc-list toc-nested">
                             {child.children.map((grandchild) => (
                               <li class="toc-item">
-                                <a href={`#${grandchild.id}`} class="toc-link">
+                                <a href={`#${grandchild.id}`} class="toc-link" data-toc-id={grandchild.id}>
                                   {grandchild.text}
                                 </a>
                               </li>
@@ -121,10 +121,9 @@ function renderTOCItem(item: TOCItem) {
   }
 
   .toc-nested {
-    margin-left: 1rem;
+    margin-left: 0.5rem;
     margin-top: 0.25rem;
-    padding-left: 0.75rem;
-    border-left: 2px solid var(--border-primary);
+    padding-left: 0.5rem;
   }
 
   .toc-item {
@@ -133,6 +132,7 @@ function renderTOCItem(item: TOCItem) {
 
   .toc-link {
     display: block;
+    position: relative;
     padding: 0.375rem 0.625rem;
     color: var(--text-secondary);
     text-decoration: none;
@@ -150,6 +150,12 @@ function renderTOCItem(item: TOCItem) {
   .toc-link:focus-visible {
     outline: 2px solid var(--accent-primary);
     outline-offset: 2px;
+  }
+
+  .toc-link.active {
+    color: var(--accent-primary);
+    background: var(--bg-secondary);
+    font-weight: 600;
   }
 
   @media (max-width: 1024px) {
@@ -176,3 +182,206 @@ function renderTOCItem(item: TOCItem) {
     background: var(--text-tertiary);
   }
 </style>
+
+<script>
+  (function initTOCScrollSync() {
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initTOCScrollSync);
+      return;
+    }
+
+    const tocLinks = document.querySelectorAll('.toc-link[data-toc-id]');
+    if (tocLinks.length === 0) return;
+
+    // Get all headings that are in the TOC (H2-H6)
+    const headings = Array.from(document.querySelectorAll('h2[id], h3[id], h4[id], h5[id], h6[id]'));
+    if (headings.length === 0) return;
+
+    // Create a map of heading IDs to TOC links
+    const headingIdToLink = new Map();
+    tocLinks.forEach((link) => {
+      const id = link.getAttribute('data-toc-id');
+      if (id) {
+        headingIdToLink.set(id, link);
+      }
+    });
+
+    let activeHeadingId = null;
+
+    // Function to update active TOC link
+    function setActiveTOCLink(headingId) {
+      // Remove active class from all links
+      tocLinks.forEach((link) => {
+        link.classList.remove('active');
+        link.setAttribute('aria-current', 'false');
+      });
+
+      // Add active class to the current link
+      if (headingId) {
+        const activeLink = headingIdToLink.get(headingId);
+        if (activeLink) {
+          activeLink.classList.add('active');
+          activeLink.setAttribute('aria-current', 'location');
+          
+          // Scroll the active link into view within the TOC sidebar
+          const tocList = activeLink.closest('.toc-list');
+          if (tocList) {
+            const linkRect = activeLink.getBoundingClientRect();
+            const listRect = tocList.getBoundingClientRect();
+            
+            // Only scroll if the link is not fully visible
+            if (linkRect.top < listRect.top || linkRect.bottom > listRect.bottom) {
+              activeLink.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'nearest',
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // Intersection Observer options
+    // Use a threshold that triggers when heading is near the top of viewport
+    const observerOptions = {
+      rootMargin: '-20% 0px -70% 0px', // Trigger when heading is in upper 30% of viewport
+      threshold: [0, 0.1, 0.5, 1],
+    };
+
+    // Track which headings are currently intersecting
+    const intersectingHeadings = new Map();
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const headingId = entry.target.id;
+        if (entry.isIntersecting) {
+          // Store the intersection ratio (higher = closer to top)
+          intersectingHeadings.set(headingId, entry.intersectionRatio);
+        } else {
+          intersectingHeadings.delete(headingId);
+        }
+      });
+
+      // Determine the active heading
+      // Prefer headings with higher intersection ratio (closer to top)
+      let newActiveId = null;
+      let maxRatio = 0;
+
+      intersectingHeadings.forEach((ratio, id) => {
+        if (ratio > maxRatio) {
+          maxRatio = ratio;
+          newActiveId = id;
+        }
+      });
+
+      // If multiple headings are visible, prefer the one closest to top of viewport
+      if (intersectingHeadings.size > 1) {
+        const viewportTop = window.scrollY;
+        let closestDistance = Infinity;
+
+        headings.forEach((heading) => {
+          const id = heading.id;
+          if (intersectingHeadings.has(id)) {
+            const rect = heading.getBoundingClientRect();
+            const distance = Math.abs(rect.top - viewportTop);
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              newActiveId = id;
+            }
+          }
+        });
+      }
+
+      // Update active state if changed
+      if (newActiveId !== activeHeadingId) {
+        activeHeadingId = newActiveId;
+        setActiveTOCLink(activeHeadingId);
+      }
+    }, observerOptions);
+
+    // Observe all headings
+    headings.forEach((heading) => {
+      observer.observe(heading);
+    });
+
+    // Handle initial page load with hash anchor
+    function handleInitialHash() {
+      const hash = window.location.hash.slice(1); // Remove #
+      if (hash && headingIdToLink.has(hash)) {
+        // Wait a bit for browser to scroll to anchor, then set active
+        setTimeout(() => {
+          const targetHeading = document.getElementById(hash);
+          if (targetHeading) {
+            activeHeadingId = hash;
+            setActiveTOCLink(activeHeadingId);
+          }
+        }, 300);
+      } else if (headings.length > 0) {
+        // No hash, check if first heading is visible
+        setTimeout(() => {
+          const firstHeading = headings[0];
+          if (firstHeading) {
+            const rect = firstHeading.getBoundingClientRect();
+            // If first heading is near top of viewport, make it active
+            if (rect.top <= window.innerHeight * 0.3 && rect.top >= -100) {
+              activeHeadingId = firstHeading.id;
+              setActiveTOCLink(activeHeadingId);
+            }
+          }
+        }, 100);
+      }
+    }
+
+    // Handle hash changes (when user clicks TOC links)
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.slice(1);
+      if (hash && headingIdToLink.has(hash)) {
+        setTimeout(() => {
+          const targetHeading = document.getElementById(hash);
+          if (targetHeading) {
+            activeHeadingId = hash;
+            setActiveTOCLink(activeHeadingId);
+          }
+        }, 100);
+      }
+    });
+
+    // Initialize on page load
+    handleInitialHash();
+
+    // Fallback: check scroll position on scroll events (for edge cases)
+    let scrollTimeout = null;
+    window.addEventListener('scroll', () => {
+      if (scrollTimeout !== null) {
+        cancelAnimationFrame(scrollTimeout);
+      }
+      scrollTimeout = requestAnimationFrame(() => {
+        // Only update if no headings are intersecting (fallback)
+        if (intersectingHeadings.size === 0 && headings.length > 0) {
+          const viewportTop = window.scrollY + 100; // Offset for sticky header
+          let closestHeading: HTMLElement | null = null;
+          let closestDistance = Infinity;
+
+          headings.forEach((heading) => {
+            const rect = heading.getBoundingClientRect();
+            const headingTop = window.scrollY + rect.top;
+            const distance = Math.abs(headingTop - viewportTop);
+            
+            // Only consider headings above or near the viewport top
+            if (headingTop <= viewportTop + 50 && distance < closestDistance) {
+              closestDistance = distance;
+              closestHeading = heading;
+            }
+          });
+
+          if (closestHeading && closestHeading.id !== activeHeadingId) {
+            activeHeadingId = closestHeading.id;
+            setActiveTOCLink(activeHeadingId);
+          }
+        }
+      });
+    }, { passive: true });
+  })();
+</script>
