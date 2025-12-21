@@ -6,17 +6,18 @@ Transform your markdown files into a stunning documentation site with zero confi
 
 ## Features
 
-- 📝 **GitHub Flavored Markdown** - Full GFM support
-- 🎨 **Claymorphism Design** - Modern, tactile UI with soft shadows
-- 🌓 **Dark Mode** - Comfortable reading in any lighting
-- 💻 **Syntax Highlighting** - Beautiful code highlighting for 100+ languages
-- 🔢 **Math Equations** - LaTeX rendering with KaTeX
-- 📊 **Mermaid Diagrams** - Flowcharts, sequence diagrams, ER diagrams, and more
-- 📱 **Fully Responsive** - Perfect on any device
-- ♿ **Accessible** - WCAG 2.1 AA compliant
-- 🚀 **Zero Configuration** - Just add markdown files
-- 🔗 **Clean URLs** - No `.md` extensions
-- 📚 **Auto Navigation** - TOC, breadcrumbs, and page titles
+- **GitHub Flavored Markdown** - Full GFM support
+- **Claymorphism Design** - Modern, tactile UI with soft shadows
+- **Dark Mode** - Comfortable reading in any lighting with theme switcher
+- **Syntax Highlighting** - Beautiful code highlighting for 100+ languages
+- **Math Equations** - LaTeX rendering with KaTeX
+- **Mermaid Diagrams** - Flowcharts, sequence diagrams, ER diagrams, and more (client-side rendering)
+- **Fully Responsive** - Perfect on any device
+- **Accessible** - WCAG 2.1 AA compliant
+- **Zero Configuration** - Just add markdown files
+- **Clean URLs** - No `.md` extensions
+- **Auto Navigation** - TOC, breadcrumbs, and page titles
+- **Auto Deployment** - GitHub Actions workflow for seamless deployment
 
 ## Quick Start
 
@@ -50,6 +51,8 @@ Visit `http://localhost:4321` to see your site.
 
 ### 4. Deploy to GitHub Pages
 
+The project includes a GitHub Actions workflow that automatically deploys to GitHub Pages on push to `main`:
+
 ```bash
 npm run build
 git add .
@@ -57,7 +60,7 @@ git commit -m "Initial commit"
 git push origin main
 ```
 
-Enable GitHub Pages in your repository settings (Settings → Pages → Source: GitHub Actions).
+The workflow (`.github/workflows/deploy.yml`) will automatically build and deploy your site. Make sure GitHub Pages is enabled in your repository settings (Settings → Pages → Source: GitHub Actions).
 
 ## Usage
 
@@ -89,13 +92,11 @@ More content...
 
 Use fenced code blocks with language identifiers:
 
-\`\`\`\`markdown
 \`\`\`javascript
 function hello() {
   console.log('Hello, MDVault!');
 }
 \`\`\`
-\`\`\`\`
 
 #### Math Equations
 
@@ -111,18 +112,18 @@ $$
 
 #### Mermaid Diagrams
 
-Create flowcharts, sequence diagrams, ER diagrams, and more:
+Create flowcharts, sequence diagrams, ER diagrams, and more. Mermaid diagrams are rendered client-side via CDN:
 
-```markdown
-```mermaid
+\`\`\`mermaid
 flowchart TD
     A[Start] --> B{Decision}
     B -->|Yes| C[Action 1]
     B -->|No| D[Action 2]
     C --> E[End]
     D --> E
-```
-```
+\`\`\`
+
+Diagrams automatically adapt to your selected theme (light/dark).
 
 #### Tables
 
@@ -136,8 +137,9 @@ flowchart TD
 
 ### Base Path
 
-For project pages (e.g., `username.github.io/mdvault`), update `astro.config.mjs`:
+The current configuration is set for project pages (e.g., `nndkhoa.github.io/mdvault`). To customize, update `astro.config.mjs`:
 
+For project pages (e.g., `username.github.io/mdvault`):
 ```javascript
 export default defineConfig({
   site: 'https://username.github.io',
@@ -146,8 +148,7 @@ export default defineConfig({
 });
 ```
 
-For user pages (e.g., `username.github.io`), use:
-
+For user pages (e.g., `username.github.io`):
 ```javascript
 export default defineConfig({
   site: 'https://username.github.io',
@@ -162,19 +163,35 @@ Edit color variables in `src/styles/global.css`:
 
 ```css
 :root[data-theme='light'] {
-  --clay-bg: #f0f0f3;
-  --accent-primary: #3498db;
+  --bg-primary: #f8fafc;
+  --accent-primary: #3b82f6;
+  --text-primary: #1e293b;
+  /* ... */
+}
+
+:root[data-theme='dark'] {
+  --bg-primary: #1a202c;
+  --accent-primary: #60a5fa;
+  --text-primary: #f7fafc;
   /* ... */
 }
 ```
+
+The project supports light and dark themes with a theme switcher in the header.
 
 ## Project Structure
 
 ```
 mdvault/
 ├── .github/
+│   ├── prompts/                # OpenSpec prompt templates
 │   └── workflows/
 │       └── deploy.yml          # GitHub Actions deployment
+├── openspec/                   # OpenSpec documentation and specs
+│   ├── AGENTS.md              # Agent instructions
+│   ├── project.md             # Project documentation
+│   ├── specs/                 # Feature specifications
+│   └── changes/               # Change proposals archive
 ├── public/
 │   └── content/                # Your markdown files go here
 │       ├── index.md
@@ -182,10 +199,25 @@ mdvault/
 │       └── docs/
 ├── src/
 │   ├── components/             # Astro components
+│   │   ├── Breadcrumbs.astro  # Breadcrumb navigation
+│   │   ├── Footer.astro       # Site footer
+│   │   ├── Header.astro       # Site header
+│   │   ├── TableOfContents.astro  # TOC sidebar
+│   │   ├── ThemeSwitcher.astro    # Theme toggle
+│   │   └── icons/              # Icon components
 │   ├── layouts/                # Page layouts
-│   ├── lib/                    # Utilities (markdown, TOC, etc.)
+│   │   └── MarkdownLayout.astro
+│   ├── lib/                    # Utilities
+│   │   ├── content.ts         # Content loading
+│   │   ├── markdown.ts        # Markdown parsing
+│   │   └── toc.ts             # Table of contents generation
 │   ├── pages/                  # Astro pages
+│   │   ├── [...slug].astro    # Dynamic markdown pages
+│   │   ├── 404.astro          # 404 error page
+│   │   └── index.astro        # Homepage
 │   └── styles/                 # CSS files
+│       ├── claymorphism.css   # Claymorphism styles
+│       └── global.css         # Global styles and themes
 ├── astro.config.mjs            # Astro configuration
 ├── package.json
 ├── tailwind.config.mjs         # Tailwind configuration
@@ -202,11 +234,12 @@ mdvault/
 
 - **Astro** - Static site generator
 - **Vite** - Build tool
-- **Tailwind CSS 4** - Styling framework
+- **Tailwind CSS 3** - Styling framework
 - **markdown-it** - Markdown parser
 - **KaTeX** - Math rendering
 - **Highlight.js** - Code syntax highlighting
-- **Mermaid** - Diagram rendering
+- **Mermaid** - Diagram rendering (via CDN)
+- **@heroicons/react** - Icon library
 
 ## Browser Support
 
