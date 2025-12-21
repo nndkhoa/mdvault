@@ -11,6 +11,7 @@ export interface CatalogEntry {
   slug: string;
   title: string;
   filename: string;
+  type: 'file' | 'directory';
 }
 
 /**
@@ -19,7 +20,9 @@ export interface CatalogEntry {
 export function loadContent(slug: string): ContentFile {
   // Handle root path
   const filePath = slug === '' || slug === '/' ? 'index.md' : `${slug}.md`;
-  const fullPath = path.join(process.cwd(), 'public', 'content', filePath);
+  // Normalize path separators (handle both / and \)
+  const normalizedPath = filePath.replace(/\\/g, '/');
+  const fullPath = path.join(process.cwd(), 'public', 'content', normalizedPath);
 
   try {
     if (fs.existsSync(fullPath)) {
@@ -72,7 +75,45 @@ export function getAllContentPaths(): string[] {
 }
 
 /**
- * List markdown files in a directory
+ * Check if a directory contains markdown files (excluding index.md) or has nested subdirectories with content
+ */
+function hasContent(dirPath: string): boolean {
+  try {
+    if (!fs.existsSync(dirPath) || !fs.statSync(dirPath).isDirectory()) {
+      return false;
+    }
+
+    const files = fs.readdirSync(dirPath);
+    
+    for (const file of files) {
+      const filePath = path.join(dirPath, file);
+      const stat = fs.statSync(filePath);
+      
+      // Check for markdown files (excluding index.md)
+      if (stat.isFile() && file.endsWith('.md') && file !== 'index.md') {
+        return true;
+      }
+      
+      // Check for nested subdirectories with content
+      if (stat.isDirectory()) {
+        const indexPath = path.join(filePath, 'index.md');
+        // If subdirectory doesn't have index.md, check if it has content
+        if (!fs.existsSync(indexPath)) {
+          if (hasContent(filePath)) {
+            return true;
+          }
+        }
+      }
+    }
+    
+    return false;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * List markdown files and subdirectories in a directory
  */
 export function listDirectoryFiles(slug: string): CatalogEntry[] {
   const dirPath = slug === '' || slug === '/' 
@@ -92,7 +133,7 @@ export function listDirectoryFiles(slug: string): CatalogEntry[] {
       const filePath = path.join(dirPath, file);
       const stat = fs.statSync(filePath);
       
-      // Only include markdown files, exclude index.md
+      // Include markdown files, exclude index.md
       if (stat.isFile() && file.endsWith('.md') && file !== 'index.md') {
         const fileSlug = slug === '' || slug === '/' 
           ? file.replace(/\.md$/, '')
@@ -102,12 +143,36 @@ export function listDirectoryFiles(slug: string): CatalogEntry[] {
           slug: fileSlug.replace(/\\/g, '/'),
           title: formatTitle(file),
           filename: file,
+          type: 'file',
         });
+      }
+      
+      // Include subdirectories that have content
+      if (stat.isDirectory()) {
+        const indexPath = path.join(filePath, 'index.md');
+        // Only include subdirectories without index.md that have content
+        if (!fs.existsSync(indexPath) && hasContent(filePath)) {
+          const dirSlug = slug === '' || slug === '/' 
+            ? file
+            : `${slug}/${file}`;
+        
+          entries.push({
+            slug: dirSlug.replace(/\\/g, '/'),
+            title: formatTitle(file),
+            filename: file,
+            type: 'directory',
+          });
+        }
       }
     }
     
-    // Sort entries alphabetically by title
-    entries.sort((a, b) => a.title.localeCompare(b.title));
+    // Sort entries: directories first, then files, both alphabetically
+    entries.sort((a, b) => {
+      if (a.type !== b.type) {
+        return a.type === 'directory' ? -1 : 1;
+      }
+      return a.title.localeCompare(b.title);
+    });
   } catch (error) {
     console.error(`Error listing directory files for ${slug}:`, error);
   }

@@ -33,7 +33,7 @@ Sinh viên được cung cấp các tài nguyên sau để thực hiện bài th
 ### A - Web App
 Sinh viên xây dựng ứng dụng Web Client-side render có các chức năng sau:
 
-**Feature 1: Hiển thị danh sách các món ăn, `url: /dishes`**
+#### **Feature 1: Hiển thị danh sách các món ăn, `url: /dishes`**
 - Món ăn đầu tiên có hiển thị khác biệt so với các món ăn còn lại
 - Phân trang dữ liệu bằng cách sử dụng các api phù hợp ở backend
 - Filter dữ liệu theo 2 tiêu chí `category` và `chef`
@@ -41,7 +41,7 @@ Sinh viên xây dựng ứng dụng Web Client-side render có các chức năng
   - Chỉ cần filter ở **client-side**
 
 
-**Feature 2: Thêm mới một món ăn, `url: /dishes/create`**
+#### **Feature 2: Thêm mới một món ăn, `url: /dishes/create`**
 - Validate dữ liệu nhập bằng các hàm xử lý custom, dùng `react-router` hoặc các thư viện xử lý form phù hợp như `formik`, `react-hook-form`
 
 ### B - Lưu ý
@@ -54,7 +54,7 @@ Sinh viên xây dựng ứng dụng Web Client-side render có các chức năng
 
 ## Thang điểm và quy định
 
-**Project (tối đa 1)**
+### **Project (tối đa 1)**
 
 | Tiêu chí | Điểm |
 |----------|------|
@@ -62,7 +62,7 @@ Sinh viên xây dựng ứng dụng Web Client-side render có các chức năng
 | Không một link nào tải lại toàn bộ trang | 0.25 |
 | Mọi thao tác chuyển trang, đọc/ghi backend đều thể hiện loading spinner (được cung cấp mẫu trong `list.html`) | 0.5 |
 
-**Chức năng hiển thị danh sách món ăn /dishes (tối đa 2.5)**
+### **Chức năng hiển thị danh sách món ăn /dishes (tối đa 2.5)**
 
 | Tiêu chí | Điểm |
 |----------|------|
@@ -72,7 +72,7 @@ Sinh viên xây dựng ứng dụng Web Client-side render có các chức năng
 | Món ăn đầu tiên trong danh sách có hiển thị khác biệt | 0.25 |
 | Giá tiền được định dạng (vd: 300,000) | 0.25 |
 
-**Chức năng phân trang ở /dishes (tối đa 2)**
+### **Chức năng phân trang ở /dishes (tối đa 2)**
 
 | Tiêu chí | Điểm |
 |----------|------|
@@ -82,14 +82,14 @@ Sinh viên xây dựng ứng dụng Web Client-side render có các chức năng
 | Chuyển trang Next/Prev | 0.5 |
 | Hiển thị page summary **Showing 1-7 of 27 dishes** ở cuối trang | 0.25 |
 
-**Chức năng filter ở /dishes (tối đa 1.5)**
+### **Chức năng filter ở /dishes (tối đa 1.5)**
 
 | Tiêu chí | Điểm |
 |----------|------|
 | Tải danh sách đầu bếp & danh sách chuyên mục vào các dropdown list | 0.75 |
 | Filter danh sách món ăn hiện có trên trang theo đầu bếp & chuyên mục | 0.75 |
 
-**Chức năng tạo mới sự kiện /dishes/create (tối đa 3)**
+### **Chức năng tạo mới sự kiện /dishes/create (tối đa 3)**
 
 | Tiêu chí | Điểm |
 |----------|------|

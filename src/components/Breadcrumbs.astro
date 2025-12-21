@@ -14,6 +14,13 @@ interface BreadcrumbItem {
   active: boolean;
 }
 
+/**
+ * Encode a slug segment for use in URLs
+ */
+function encodeSlugSegment(segment: string): string {
+  return encodeURIComponent(segment);
+}
+
 function generateBreadcrumbs(path: string): BreadcrumbItem[] {
   const breadcrumbs: BreadcrumbItem[] = [
     { label: "Home", url: base, active: false },
@@ -39,7 +46,7 @@ function generateBreadcrumbs(path: string): BreadcrumbItem[] {
   let currentPath = "";
 
   parts.forEach((part, index) => {
-    currentPath += "/" + part;
+    currentPath += "/" + encodeSlugSegment(part);
     const label = part
       .replace(/-/g, " ")
       .replace(/\b\w/g, (l) => l.toUpperCase());
