@@ -1,0 +1,19 @@
+---
+import MarkdownLayout from '@/layouts/MarkdownLayout.astro';
+import { loadContent } from '@/lib/content';
+import { parseMarkdown } from '@/lib/markdown';
+import { generateTOC } from '@/lib/toc';
+
+const { content, exists } = loadContent('');
+
+if (!exists) {
+  return Astro.redirect('/404');
+}
+
+const { title, html } = parseMarkdown(content);
+const toc = generateTOC(html);
+---
+
+<MarkdownLayout title={title} slug="" toc={toc}>
+  <article class="markdown-body" set:html={html} />
+</MarkdownLayout>

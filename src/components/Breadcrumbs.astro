@@ -1,0 +1,132 @@
+---
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+
+interface BreadcrumbItem {
+  label: string;
+  url: string;
+  active: boolean;
+}
+
+function generateBreadcrumbs(path: string): BreadcrumbItem[] {
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: "Home", url: "/", active: false },
+  ];
+
+  if (!path || path === "" || path === "404") {
+    if (path === "404") {
+      breadcrumbs.push({ label: "404", url: "/404", active: true });
+    } else {
+      breadcrumbs[0].active = true;
+    }
+    return breadcrumbs;
+  }
+
+  const parts = path.split("/").filter(Boolean);
+  let currentPath = "";
+
+  parts.forEach((part, index) => {
+    currentPath += "/" + part;
+    const label = part
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+
+    breadcrumbs.push({
+      label,
+      url: currentPath,
+      active: index === parts.length - 1,
+    });
+  });
+
+  return breadcrumbs;
+}
+
+const breadcrumbs = generateBreadcrumbs(slug);
+---
+
+<nav aria-label="Breadcrumb" class="breadcrumbs-nav">
+  <ol class="breadcrumbs">
+    {
+      breadcrumbs.map((item) => (
+        <li class="breadcrumb-item">
+          {item.active ? (
+            <span aria-current="page" class="breadcrumb-current">
+              {item.label}
+            </span>
+          ) : (
+            <>
+              <a href={item.url} class="breadcrumb-link">
+                {item.label}
+              </a>
+              <span class="breadcrumb-separator">/</span>
+            </>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .breadcrumbs-nav {
+    background: var(--clay-bg-secondary);
+    border-bottom: 1px solid var(--clay-border);
+  }
+
+  .breadcrumbs {
+    list-style: none;
+    padding: 1rem 1.5rem;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .breadcrumb-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .breadcrumb-link:hover {
+    color: var(--accent-primary);
+  }
+
+  .breadcrumb-link:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .breadcrumb-separator {
+    color: var(--text-tertiary);
+    user-select: none;
+  }
+
+  .breadcrumb-current {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  @media (max-width: 768px) {
+    .breadcrumbs-nav {
+      padding: 0.75rem 1rem;
+    }
+
+    .breadcrumb-item {
+      font-size: 0.8125rem;
+    }
+  }
+</style>

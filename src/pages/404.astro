@@ -1,0 +1,65 @@
+---
+import MarkdownLayout from '@/layouts/MarkdownLayout.astro';
+---
+
+<MarkdownLayout title="404 - Page Not Found" slug="404" toc={[]}>
+  <div class="error-page">
+    <h1 class="error-title">404</h1>
+    <p class="error-message">Document Not Found</p>
+    <p class="error-description">
+      The requested document doesn't exist in the content directory.
+    </p>
+    <a href="/" class="button-primary">← Back to Home</a>
+  </div>
+</MarkdownLayout>
+
+<style>
+  .error-page {
+    text-align: center;
+    padding: 4rem 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .error-title {
+    font-size: 6rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+  }
+
+  .error-message {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 1rem 0;
+    color: var(--text-secondary);
+  }
+
+  .error-description {
+    font-size: 1rem;
+    margin: 1.5rem 0;
+    color: var(--text-secondary);
+  }
+
+  .button-primary {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    margin-top: 2rem;
+    background: var(--clay-bg);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow:
+      6px 6px 12px var(--clay-shadow-dark),
+      -6px -6px 12px var(--clay-shadow-light);
+    transition: all 0.2s ease;
+  }
+
+  .button-primary:hover {
+    box-shadow:
+      4px 4px 8px var(--clay-shadow-dark),
+      -4px -4px 8px var(--clay-shadow-light);
+    transform: translateY(2px);
+  }
+</style>

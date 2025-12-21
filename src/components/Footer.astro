@@ -1,0 +1,37 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-container">
+    <p class="footer-text">
+      © {currentYear} | Powered by <strong>MDVault</strong>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 4rem;
+    padding: 2rem 1.5rem;
+    background: var(--clay-bg-secondary);
+    border-top: 1px solid var(--clay-border);
+  }
+
+  .footer-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .footer-text {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+  }
+
+  .footer-text strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+</style>

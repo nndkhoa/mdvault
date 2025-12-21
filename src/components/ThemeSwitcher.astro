@@ -1,0 +1,86 @@
+---
+---
+
+<button id="theme-toggle" aria-label="Toggle theme" class="theme-toggle">
+  <span class="theme-icon" id="theme-icon">🌙</span>
+</button>
+
+<script>
+  // Load saved theme or default to light
+  function getInitialTheme() {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('mdvault-theme');
+      if (saved === 'light' || saved === 'dark') {
+        return saved;
+      }
+    }
+    return 'light';
+  }
+
+  function setTheme(theme: 'light' | 'dark') {
+    document.documentElement.setAttribute('data-theme', theme);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('mdvault-theme', theme);
+    }
+
+    // Update icon
+    const icon = document.getElementById('theme-icon');
+    if (icon) {
+      icon.textContent = theme === 'light' ? '🌙' : '☀️';
+    }
+  }
+
+  // Initialize theme
+  const initialTheme = getInitialTheme();
+  setTheme(initialTheme);
+
+  // Theme toggle handler
+  const toggleButton = document.getElementById('theme-toggle');
+  if (toggleButton) {
+    toggleButton.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      setTheme(newTheme);
+    });
+  }
+</script>
+
+<style>
+  .theme-toggle {
+    background: var(--clay-bg);
+    border: 1px solid var(--clay-border);
+    border-radius: 12px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    box-shadow:
+      4px 4px 8px var(--clay-shadow-dark),
+      -4px -4px 8px var(--clay-shadow-light);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .theme-toggle:hover {
+    box-shadow:
+      2px 2px 4px var(--clay-shadow-dark),
+      -2px -2px 4px var(--clay-shadow-light);
+    transform: translateY(1px);
+  }
+
+  .theme-toggle:active {
+    box-shadow:
+      inset 2px 2px 4px var(--clay-shadow-dark),
+      inset -2px -2px 4px var(--clay-shadow-light);
+  }
+
+  .theme-toggle:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+  }
+
+  .theme-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+</style>

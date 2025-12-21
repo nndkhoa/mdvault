@@ -1,0 +1,32 @@
+---
+import MarkdownLayout from "@/layouts/MarkdownLayout.astro";
+import { loadContent, getAllContentPaths } from "@/lib/content";
+import { parseMarkdown } from "@/lib/markdown";
+import { generateTOC } from "@/lib/toc";
+
+export function getStaticPaths() {
+  const paths = getAllContentPaths();
+
+  return paths
+    .filter((path) => path !== "") // Exclude index (handled by index.astro)
+    .map((path) => ({
+      params: { slug: path },
+    }));
+}
+
+const { slug = "" } = Astro.params;
+const slugPath = Array.isArray(slug) ? slug.join("/") : slug;
+
+const { content, exists } = loadContent(slugPath);
+
+if (!exists) {
+  return Astro.redirect("/404");
+}
+
+const { title, html } = parseMarkdown(content);
+const toc = generateTOC(html);
+---
+
+<MarkdownLayout title={title} slug={slugPath} toc={toc}>
+  <article class="markdown-body" set:html={html} />
+</MarkdownLayout>
