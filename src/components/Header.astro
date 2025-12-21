@@ -36,7 +36,7 @@ const base = import.meta.env.BASE_URL;
   }
 
   .header-container {
-    max-width: 1400px;
+    width: 1400px;
     margin: 0 auto;
     padding: 1rem 1.5rem;
     display: flex;
@@ -87,8 +87,14 @@ const base = import.meta.env.BASE_URL;
     font-weight: 600;
     letter-spacing: -0.025em;
     color: var(--text-primary);
-    font-family: "Outfit", sans-serif;
+    font-family: "Inter", sans-serif;
     transition: color 0.2s ease;
+  }
+
+  @media (max-width: 1430px) {
+    .header-container {
+      width: 100%;
+    }
   }
 
   @media (max-width: 768px) {

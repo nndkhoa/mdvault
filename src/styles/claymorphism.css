@@ -75,7 +75,7 @@
   line-height: 1.3;
   color: var(--text-primary);
   position: relative;
-  font-family: "Outfit", sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .markdown-body h1 {

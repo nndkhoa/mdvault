@@ -21,9 +21,16 @@ function generateBreadcrumbs(path: string): BreadcrumbItem[] {
 
   if (!path || path === "" || path === "404") {
     if (path === "404") {
-      breadcrumbs.push({ label: "404", url: "/404", active: true });
+      breadcrumbs.push({ label: "404", url: base + "404", active: true });
     } else {
+      // On home page, add Docs and Blog links
       breadcrumbs[0].active = true;
+      const docsUrl = base.endsWith('/') ? base + 'docs' : base + '/docs';
+      const blogUrl = base.endsWith('/') ? base + 'blog' : base + '/blog';
+      breadcrumbs.push(
+        { label: "Docs", url: docsUrl, active: false },
+        { label: "Blog", url: blogUrl, active: false }
+      );
     }
     return breadcrumbs;
   }
@@ -70,11 +77,14 @@ const breadcrumbs = generateBreadcrumbs(slug);
                 )}
                 {item.label}
               </a>
-              <Icon
-                name="chevron-right"
-                size="sm"
-                class="breadcrumb-separator"
-              />
+              {/* Don't show separator on home page links */}
+              {slug !== "" && (
+                <Icon
+                  name="chevron-right"
+                  size="sm"
+                  class="breadcrumb-separator"
+                />
+              )}
             </>
           )}
         </li>

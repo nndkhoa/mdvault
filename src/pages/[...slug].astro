@@ -1,32 +1,440 @@
 ---
 import MarkdownLayout from "@/layouts/MarkdownLayout.astro";
-import { loadContent, getAllContentPaths } from "@/lib/content";
+import { loadContent, getAllContentPaths, isDirectory, listDirectoryFiles } from "@/lib/content";
 import { parseMarkdown } from "@/lib/markdown";
 import { generateTOC } from "@/lib/toc";
+import fs from 'fs';
+import path from 'path';
 
 export function getStaticPaths() {
   const paths = getAllContentPaths();
+  const allPaths: Array<{ params: { slug: string } }> = [];
 
-  return paths
+  // Add all markdown file paths
+  paths
     .filter((path) => path !== "") // Exclude index (handled by index.astro)
-    .map((path) => ({
-      params: { slug: path },
-    }));
+    .forEach((path) => {
+      allPaths.push({ params: { slug: path } });
+    });
+
+  // Add directory paths for catalog pages
+  const contentDir = path.join(process.cwd(), 'public', 'content');
+  
+  function addDirectoryPaths(dir: string, basePath: string = '') {
+    try {
+      if (!fs.existsSync(dir)) return;
+      
+      const files = fs.readdirSync(dir);
+      for (const file of files) {
+        const filePath = path.join(dir, file);
+        const stat = fs.statSync(filePath);
+        
+        if (stat.isDirectory()) {
+          const dirSlug = basePath === '' ? file : `${basePath}/${file}`;
+          // Check if directory doesn't have index.md
+          const indexPath = path.join(filePath, 'index.md');
+          if (!fs.existsSync(indexPath)) {
+            // Check if directory has markdown files
+            const dirFiles = fs.readdirSync(filePath);
+            const hasMarkdown = dirFiles.some(f => {
+              const fPath = path.join(filePath, f);
+              try {
+                return fs.statSync(fPath).isFile() && f.endsWith('.md') && f !== 'index.md';
+              } catch {
+                return false;
+              }
+            });
+            if (hasMarkdown) {
+              allPaths.push({ params: { slug: dirSlug } });
+            }
+          }
+          // Recursively check subdirectories
+          addDirectoryPaths(filePath, dirSlug);
+        }
+      }
+    } catch (error) {
+      // Ignore errors
+    }
+  }
+
+  if (fs.existsSync(contentDir)) {
+    addDirectoryPaths(contentDir);
+  }
+
+  return allPaths;
 }
 
 const { slug = "" } = Astro.params;
 const slugPath = Array.isArray(slug) ? slug.join("/") : slug;
 
-const { content, exists } = loadContent(slugPath);
+// Check if this is a directory route
+const isDir = isDirectory(slugPath);
+let showCatalog = false;
+let catalogEntries: Array<{ slug: string; title: string; filename: string }> = [];
+let catalogTitle = '';
+let pageTitle = '';
+let pageContent = '';
+let pageToc: any[] = [];
 
-if (!exists) {
-  return Astro.redirect(import.meta.env.BASE_URL + "/404");
+if (isDir) {
+  // Check if index.md exists in this directory
+  const indexSlug = slugPath === '' ? 'index' : `${slugPath}/index`;
+  const indexContent = loadContent(indexSlug);
+  
+  if (!indexContent.exists) {
+    // Show catalog
+    catalogEntries = listDirectoryFiles(slugPath);
+    
+    if (catalogEntries.length === 0) {
+      // Empty directory, redirect to 404
+      return Astro.redirect(import.meta.env.BASE_URL + "/404");
+    }
+
+    showCatalog = true;
+    // Generate title from slug
+    catalogTitle = slugPath === '' 
+      ? 'Content' 
+      : slugPath.split('/').pop()?.replace(/-/g, ' ').split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || slugPath;
+    pageTitle = catalogTitle;
+    pageToc = [];
+  } else {
+    // Directory has index.md, load it
+    const { title, html } = parseMarkdown(indexContent.content);
+    pageTitle = title;
+    pageContent = html;
+    pageToc = generateTOC(html);
+  }
 }
 
-const { title, html } = parseMarkdown(content);
-const toc = generateTOC(html);
+if (!showCatalog && !pageContent) {
+  // Try to load as a markdown file
+  const { content, exists } = loadContent(slugPath);
+  
+  if (!exists) {
+    return Astro.redirect(import.meta.env.BASE_URL + "/404");
+  }
+  
+  const { title, html } = parseMarkdown(content);
+  pageTitle = title;
+  pageContent = html;
+  pageToc = generateTOC(html);
+}
+
+const baseUrl = import.meta.env.BASE_URL;
 ---
 
-<MarkdownLayout title={title} slug={slugPath} toc={toc}>
-  <article class="markdown-body" set:html={html} />
-</MarkdownLayout>
+{showCatalog ? (
+  <MarkdownLayout title={pageTitle} slug={slugPath} toc={pageToc}>
+    <div class="catalog-container">
+      <div class="catalog-header">
+        <h1 class="catalog-title">{catalogTitle}</h1>
+        <p class="catalog-description">
+          Browse available content in this directory
+        </p>
+      </div>
+      <div class="catalog-grid" role="list">
+        {catalogEntries.map((entry) => (
+          <article class="catalog-card" role="listitem">
+            <a 
+              href={`${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}${entry.slug}`} 
+              class="catalog-card-link"
+              aria-label={`View ${entry.title}`}
+            >
+              <div class="catalog-card-header">
+                <div class="catalog-card-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                  </svg>
+                </div>
+                <h2 class="catalog-card-title">{entry.title}</h2>
+              </div>
+              <div class="catalog-card-arrow" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+    </div>
+  </MarkdownLayout>
+) : (
+  <MarkdownLayout title={pageTitle} slug={slugPath} toc={pageToc}>
+    <article class="markdown-body" set:html={pageContent} />
+  </MarkdownLayout>
+)}
+
+<style>
+  .catalog-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Override parent max-width constraint for catalog pages */
+  :global(.content-wrapper.no-toc) {
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  :global(.main-content) {
+    max-width: none !important;
+  }
+
+  .catalog-header {
+    margin-bottom: 2.5rem;
+    padding-top: 1rem;
+  }
+
+  .catalog-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.75rem 0;
+    line-height: 1.2;
+  }
+
+  .catalog-description {
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .catalog-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
+
+  @media (min-width: 1400px) {
+    .catalog-grid {
+      grid-template-columns: repeat(4, 1fr) !important;
+    }
+  }
+
+  .catalog-card {
+    margin: 0;
+  }
+
+  .catalog-card-link {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .catalog-card-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .catalog-card-link:hover {
+    background: var(--bg-elevated);
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+  }
+
+  .catalog-card-link:hover::before {
+    transform: scaleX(1);
+  }
+
+  .catalog-card-link:focus {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+  }
+
+  .catalog-card-link:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  .catalog-card-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .catalog-card-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    color: var(--accent-primary);
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .catalog-card-link:hover .catalog-card-icon {
+    background: var(--accent-primary);
+    color: white;
+    transform: scale(1.05);
+  }
+
+  .catalog-card-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .catalog-card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.4;
+    transition: color 0.2s ease;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .catalog-card-link:hover .catalog-card-title {
+    color: var(--accent-primary);
+  }
+
+  .catalog-card-arrow {
+    width: 20px;
+    height: 20px;
+    color: var(--text-tertiary);
+    transition: all 0.2s ease;
+    opacity: 0;
+    transform: translateX(-4px);
+    flex-shrink: 0;
+  }
+
+  .catalog-card-link:hover .catalog-card-arrow {
+    opacity: 1;
+    transform: translateX(0);
+    color: var(--accent-primary);
+  }
+
+  .catalog-card-link:focus .catalog-card-arrow {
+    opacity: 1;
+  }
+
+  .catalog-card-arrow svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 1024px) {
+    .catalog-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 1.25rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .catalog-container {
+      padding: 0 1rem;
+    }
+
+    .catalog-header {
+      margin-bottom: 2rem;
+      padding-top: 0.875rem;
+    }
+
+    .catalog-title {
+      font-size: 1.875rem;
+    }
+
+    .catalog-description {
+      font-size: 1rem;
+    }
+
+    .catalog-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 1rem;
+    }
+
+    .catalog-card-link {
+      padding: 1rem 1.25rem;
+    }
+
+    .catalog-card-header {
+      gap: 0.875rem;
+    }
+
+    .catalog-card-icon {
+      width: 36px;
+      height: 36px;
+    }
+
+    .catalog-card-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .catalog-card-title {
+      font-size: 1rem;
+    }
+
+    .catalog-card-arrow {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .catalog-container {
+      padding: 0 1rem;
+    }
+
+    .catalog-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    .catalog-card-link {
+      padding: 0.875rem 1rem;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .catalog-card-link,
+    .catalog-card-icon,
+    .catalog-card-arrow,
+    .catalog-card-title {
+      transition: none;
+    }
+
+    .catalog-card-link:hover {
+      transform: none;
+    }
+  }
+</style>
