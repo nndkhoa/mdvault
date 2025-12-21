@@ -1,13 +1,13 @@
 ---
-import MarkdownLayout from '@/layouts/MarkdownLayout.astro';
-import { loadContent } from '@/lib/content';
-import { parseMarkdown } from '@/lib/markdown';
-import { generateTOC } from '@/lib/toc';
+import MarkdownLayout from "@/layouts/MarkdownLayout.astro";
+import { loadContent } from "@/lib/content";
+import { parseMarkdown } from "@/lib/markdown";
+import { generateTOC } from "@/lib/toc";
 
-const { content, exists } = loadContent('');
+const { content, exists } = loadContent("");
 
 if (!exists) {
-  return Astro.redirect('/404');
+  return Astro.redirect(import.meta.env.BASE_URL + "/404");
 }
 
 const { title, html } = parseMarkdown(content);

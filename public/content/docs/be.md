@@ -192,8 +192,6 @@ GET /dishes
 → Với 27 món: total_pages=3, can_navigate_next=true
 ```
 
----
-
 #### **Endpoint 2: GET /chefs**
 
 Trả về danh sách tất cả đầu bếp (dùng cho dropdown list).
@@ -217,8 +215,6 @@ Trả về danh sách tất cả đầu bếp (dùng cho dropdown list).
 }
 ```
 
----
-
 #### **Endpoint 3: GET /categories**
 
 Trả về danh sách tất cả chuyên mục (dùng cho dropdown list).
@@ -239,8 +235,6 @@ Trả về danh sách tất cả chuyên mục (dùng cho dropdown list).
   ]
 }
 ```
-
----
 
 #### **Endpoint 4: POST /dishes**
 
@@ -324,8 +318,6 @@ Tạo món ăn mới với đầy đủ validation.
 }
 ```
 
----
-
 ### B - Yêu cầu kỹ thuật
 
 #### Authentication
@@ -384,8 +376,6 @@ const { data } = await supabase
   .eq('category_id', category_id);
 ```
 
----
-
 ### C - Công cụ khuyên dùng
 
 **Backend Framework:**
@@ -409,8 +399,6 @@ const { data } = await supabase
   - Supabase URL & Anon Key
   - Port number
 
----
-
 ## Thang điểm và quy định
 
 ### **Project Setup & Configuration (1 điểm)**
@@ -421,16 +409,12 @@ const { data } = await supabase
 | Cấu hình environment variables (.env file) đầy đủ | 0.25 |
 | Cấu hình CORS cho phép frontend truy cập | 0.25 |
 
----
-
 ### **GET /chefs, /categories (1 điểm)**
 
 | Tiêu chí | Điểm |
 |----------|------|
 | GET /chefs trả về tất cả chefs với cấu trúc `{ data: [...] }` | 0.5 |
 | GET /categories trả về tất cả categories với cấu trúc `{ data: [...] }` | 0.5 |
-
----
 
 ### **GET /dishes - Filtering & Pagination (5 điểm)**
 
@@ -442,8 +426,6 @@ const { data } = await supabase
 | Filter theo cả category_id VÀ chef_id hoạt động đúng | 0.5 |
 | Pagination hoạt động chính xác với query `page` (limit cố định = 9) | 1.25 |
 | Metadata chứa đầy đủ 7 fields: `current_page`, `total_pages`, `total_dishes`, `can_navigate_next`, `can_navigate_prev`, `from_offset`, `to_offset` | 0.75 |
-
----
 
 ### **POST /dishes - Create with Validation (3 điểm)**
 

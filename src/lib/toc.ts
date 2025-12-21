@@ -12,6 +12,22 @@ export interface TOCItem {
 }
 
 /**
+ * Decode HTML entities
+ */
+function decodeHTMLEntities(text: string): string {
+  const entities: Record<string, string> = {
+    "&amp;": "&",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&quot;": '"',
+    "&#39;": "'",
+    "&apos;": "'",
+  };
+
+  return text.replace(/&[a-z]+;|&#\d+;/gi, (match) => entities[match] || match);
+}
+
+/**
  * Extract headings (H2-H6) from HTML content
  */
 export function extractHeadings(html: string): Heading[] {
@@ -22,8 +38,8 @@ export function extractHeadings(html: string): Heading[] {
   while ((match = regex.exec(html)) !== null) {
     const level = parseInt(match[1]);
     const id = match[2];
-    // Remove any HTML tags from the heading text
-    const text = match[3].replace(/<[^>]*>/g, '').trim();
+    // Remove any HTML tags from the heading text and decode HTML entities
+    const text = decodeHTMLEntities(match[3].replace(/<[^>]*>/g, "").trim());
 
     headings.push({ level, id, text });
   }

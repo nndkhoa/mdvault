@@ -1,37 +1,83 @@
 ---
+import Icon from "./icons/Icon.astro";
+
 const currentYear = new Date().getFullYear();
 ---
 
 <footer class="site-footer" role="contentinfo">
   <div class="footer-container">
-    <p class="footer-text">
-      © {currentYear} | Powered by <strong>MDVault</strong>
-    </p>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <Icon name="book-open" size="md" class="footer-icon" />
+        <span class="footer-brand-text">MDVault</span>
+      </div>
+      <p class="footer-text">
+        A clean and modern markdown viewer for your documentation
+      </p>
+      <p class="footer-copyright">
+        © {currentYear} MDVault. Built with ❤️ using Astro
+      </p>
+    </div>
   </div>
 </footer>
 
 <style>
   .site-footer {
     margin-top: 4rem;
-    padding: 2rem 1.5rem;
-    background: var(--clay-bg-secondary);
-    border-top: 1px solid var(--clay-border);
+    padding: 3rem 1.5rem 2rem;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-primary);
   }
 
   .footer-container {
     max-width: 1400px;
     margin: 0 auto;
-    text-align: center;
+  }
+
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .footer-icon {
+    color: var(--accent-primary);
+  }
+
+  .footer-brand-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: "Outfit", sans-serif;
   }
 
   .footer-text {
     margin: 0;
     color: var(--text-secondary);
     font-size: 0.875rem;
+    text-align: center;
   }
 
-  .footer-text strong {
-    color: var(--text-primary);
-    font-weight: 600;
+  .footer-copyright {
+    margin: 0.5rem 0 0;
+    color: var(--text-tertiary);
+    font-size: 0.8125rem;
+  }
+
+  @media (max-width: 768px) {
+    .site-footer {
+      padding: 2rem 1rem 1.5rem;
+    }
+
+    .footer-brand-text {
+      font-size: 1rem;
+    }
   }
 </style>

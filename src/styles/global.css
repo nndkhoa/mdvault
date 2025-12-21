@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Work+Sans:wght@300;400;500;600&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,50 +7,106 @@
 /* CSS Custom Properties for Theming */
 :root[data-theme="light"] {
   /* Background Colors */
-  --clay-bg: #f0f0f3;
-  --clay-bg-secondary: #e8e8eb;
-  --clay-border: #d1d1d4;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-tertiary: #ffffff;
+  --bg-elevated: #ffffff;
 
-  /* Shadows */
-  --clay-shadow-dark: rgba(163, 177, 198, 0.6);
-  --clay-shadow-light: rgba(255, 255, 255, 0.5);
+  /* Border Colors */
+  --border-primary: #e2e8f0;
+  --border-secondary: #cbd5e1;
 
   /* Text Colors */
-  --text-primary: #2c3e50;
-  --text-secondary: #5a6c7d;
-  --text-tertiary: #95a5a6;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
 
   /* Accent Colors */
-  --accent-primary: #3498db;
-  --accent-secondary: #9b59b6;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #60a5fa;
+  --accent-hover: #2563eb;
+  --accent-cta: #f97316;
 
   /* Code Highlighting */
-  --code-bg: #f6f8fa;
-  --code-text: #24292e;
+  --code-bg: #f1f5f9;
+  --code-text: #1e293b;
+  --code-border: #e2e8f0;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 :root[data-theme="dark"] {
   /* Background Colors */
-  --clay-bg: #1a1a2e;
-  --clay-bg-secondary: #16213e;
-  --clay-border: #0f3460;
+  --bg-primary: #1a202c;
+  --bg-secondary: #2d3748;
+  --bg-tertiary: #4a5568;
+  --bg-elevated: #2d3748;
 
-  /* Shadows */
-  --clay-shadow-dark: rgba(0, 0, 0, 0.4);
-  --clay-shadow-light: rgba(255, 255, 255, 0.05);
+  /* Border Colors */
+  --border-primary: #3a4556;
+  --border-secondary: #4a5568;
 
   /* Text Colors */
-  --text-primary: #eaeaea;
-  --text-secondary: #b8b8b8;
-  --text-tertiary: #6c6c6c;
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #a0aec0;
 
   /* Accent Colors */
-  --accent-primary: #58a6ff;
-  --accent-secondary: #bc8cff;
+  --accent-primary: #63b3ed;
+  --accent-secondary: #90cdf4;
+  --accent-hover: #4299e1;
+  --accent-cta: #f6ad55;
 
   /* Code Highlighting */
-  --code-bg: #161b22;
-  --code-text: #c9d1d9;
+  --code-bg: #2d3748;
+  --code-text: #e2e8f0;
+  --code-border: #3a4556;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-md:
+    0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.15);
+  --shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.25), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+}
+
+:root[data-theme="sepia"] {
+  /* Background Colors */
+  --bg-primary: #f4f1ea;
+  --bg-secondary: #ebe6dc;
+  --bg-tertiary: #fffef9;
+  --bg-elevated: #fffef9;
+
+  /* Border Colors */
+  --border-primary: #d4cfc1;
+  --border-secondary: #beb9ab;
+
+  /* Text Colors */
+  --text-primary: #3e2c1e;
+  --text-secondary: #5c4a3a;
+  --text-tertiary: #8b7963;
+
+  /* Accent Colors */
+  --accent-primary: #a0826d;
+  --accent-secondary: #b8a088;
+  --accent-hover: #8b6f5b;
+  --accent-cta: #c17d4f;
+
+  /* Code Highlighting */
+  --code-bg: #ebe6dc;
+  --code-text: #3e2c1e;
+  --code-border: #d4cfc1;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(62 44 30 / 0.08);
+  --shadow-md:
+    0 4px 6px -1px rgb(62 44 30 / 0.12), 0 2px 4px -2px rgb(62 44 30 / 0.08);
+  --shadow-lg:
+    0 10px 15px -3px rgb(62 44 30 / 0.15), 0 4px 6px -4px rgb(62 44 30 / 0.1);
 }
 
 /* Base Styles */
@@ -58,7 +116,13 @@
 
 html {
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    "Work Sans",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Helvetica,
+    Arial,
+    sans-serif;
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -68,11 +132,25 @@ html {
 body {
   margin: 0;
   padding: 0;
-  background: var(--clay-bg);
+  background: var(--bg-primary);
   color: var(--text-primary);
   transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family:
+    "Outfit",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
 
 /* Focus Styles */
@@ -90,6 +168,7 @@ body {
 /* Smooth Scrolling */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 6rem; /* Offset for sticky header */
 }
 
 @media (prefers-reduced-motion: reduce) {

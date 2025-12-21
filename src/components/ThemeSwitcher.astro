@@ -1,33 +1,60 @@
 ---
+import Icon from "./icons/Icon.astro";
 ---
 
 <button id="theme-toggle" aria-label="Toggle theme" class="theme-toggle">
-  <span class="theme-icon" id="theme-icon">🌙</span>
+  <Icon name="sun" size="md" class="theme-icon sun-icon" />
+  <Icon name="moon" size="md" class="theme-icon moon-icon" />
+  <span class="theme-icon sepia-icon">A</span>
 </button>
 
 <script>
-  // Load saved theme or default to light
-  function getInitialTheme() {
-    if (typeof localStorage !== 'undefined') {
-      const saved = localStorage.getItem('mdvault-theme');
-      if (saved === 'light' || saved === 'dark') {
+  type Theme = "light" | "dark" | "sepia";
+
+  // Load saved theme or default to sepia
+  function getInitialTheme(): Theme {
+    if (typeof localStorage !== "undefined") {
+      const saved = localStorage.getItem("mdvault-theme");
+      if (saved === "light" || saved === "dark" || saved === "sepia") {
         return saved;
       }
     }
-    return 'light';
+    return "sepia";
   }
 
-  function setTheme(theme: 'light' | 'dark') {
-    document.documentElement.setAttribute('data-theme', theme);
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('mdvault-theme', theme);
-    }
+  function updateIconVisibility(theme: Theme) {
+    const sunIcon = document.querySelector(".sun-icon");
+    const moonIcon = document.querySelector(".moon-icon");
+    const sepiaIcon = document.querySelector(".sepia-icon");
 
-    // Update icon
-    const icon = document.getElementById('theme-icon');
-    if (icon) {
-      icon.textContent = theme === 'light' ? '🌙' : '☀️';
+    if (sunIcon && moonIcon && sepiaIcon) {
+      sunIcon.classList.add("hidden");
+      moonIcon.classList.add("hidden");
+      sepiaIcon.classList.add("hidden");
+
+      if (theme === "light") {
+        moonIcon.classList.remove("hidden");
+      } else if (theme === "dark") {
+        sepiaIcon.classList.remove("hidden");
+      } else {
+        sunIcon.classList.remove("hidden");
+      }
     }
+  }
+
+  function setTheme(theme: Theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("mdvault-theme", theme);
+    }
+    updateIconVisibility(theme);
+  }
+
+  function getNextTheme(currentTheme: Theme): Theme {
+    const themes: Theme[] = ["light", "dark", "sepia"];
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    return themes[nextIndex];
   }
 
   // Initialize theme
@@ -35,11 +62,13 @@
   setTheme(initialTheme);
 
   // Theme toggle handler
-  const toggleButton = document.getElementById('theme-toggle');
+  const toggleButton = document.getElementById("theme-toggle");
   if (toggleButton) {
-    toggleButton.addEventListener('click', () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    toggleButton.addEventListener("click", () => {
+      const currentTheme = document.documentElement.getAttribute(
+        "data-theme",
+      ) as Theme;
+      const newTheme = getNextTheme(currentTheme || "light");
       setTheme(newTheme);
     });
   }
@@ -47,31 +76,24 @@
 
 <style>
   .theme-toggle {
-    background: var(--clay-bg);
-    border: 1px solid var(--clay-border);
-    border-radius: 12px;
-    padding: 0.5rem 0.75rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: 10px;
+    padding: 0.5rem;
     cursor: pointer;
-    box-shadow:
-      4px 4px 8px var(--clay-shadow-dark),
-      -4px -4px 8px var(--clay-shadow-light);
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    width: 2.5rem;
+    height: 2.5rem;
   }
 
   .theme-toggle:hover {
-    box-shadow:
-      2px 2px 4px var(--clay-shadow-dark),
-      -2px -2px 4px var(--clay-shadow-light);
-    transform: translateY(1px);
-  }
-
-  .theme-toggle:active {
-    box-shadow:
-      inset 2px 2px 4px var(--clay-shadow-dark),
-      inset -2px -2px 4px var(--clay-shadow-light);
+    background: var(--bg-secondary);
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-md);
   }
 
   .theme-toggle:focus-visible {
@@ -80,7 +102,29 @@
   }
 
   .theme-icon {
-    font-size: 1.25rem;
-    line-height: 1;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    position: absolute;
+  }
+
+  .sepia-icon {
+    font-family: "Georgia", serif;
+    font-weight: 600;
+    font-size: 1.125rem;
+    font-style: italic;
+  }
+
+  .theme-toggle:hover .theme-icon {
+    color: var(--accent-primary);
+  }
+
+  .theme-icon.hidden {
+    opacity: 0;
+    transform: rotate(180deg) scale(0);
+  }
+
+  .theme-icon:not(.hidden) {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
   }
 </style>

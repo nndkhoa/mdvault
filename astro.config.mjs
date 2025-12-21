@@ -1,10 +1,10 @@
-import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
+import { defineConfig } from "astro/config";
+import tailwind from "@astrojs/tailwind";
 
 export default defineConfig({
-  site: 'https://yourusername.github.io',
-  base: '/mdvault',
-  output: 'static',
+  site: "https://nndkhoa.github.io",
+  base: "/mdvault",
+  output: "static",
   integrations: [
     tailwind({
       applyBaseStyles: false,
@@ -12,7 +12,7 @@ export default defineConfig({
   ],
   vite: {
     ssr: {
-      noExternal: ['katex'],
+      noExternal: ["katex"],
     },
   },
 });

@@ -20,7 +20,7 @@ const slugPath = Array.isArray(slug) ? slug.join("/") : slug;
 const { content, exists } = loadContent(slugPath);
 
 if (!exists) {
-  return Astro.redirect("/404");
+  return Astro.redirect(import.meta.env.BASE_URL + "/404");
 }
 
 const { title, html } = parseMarkdown(content);
