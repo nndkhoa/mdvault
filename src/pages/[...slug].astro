@@ -1,6 +1,6 @@
 ---
 import MarkdownLayout from "@/layouts/MarkdownLayout.astro";
-import { loadContent, getAllContentPaths, isDirectory, listDirectoryFiles } from "@/lib/content";
+import { loadContent, getAllContentPaths, isDirectory, listDirectoryFiles, hasContent } from "@/lib/content";
 import { parseMarkdown } from "@/lib/markdown";
 import { generateTOC } from "@/lib/toc";
 import fs from 'fs';
@@ -43,17 +43,8 @@ export function getStaticPaths() {
           // Check if directory doesn't have index.md
           const indexPath = path.join(filePath, 'index.md');
           if (!fs.existsSync(indexPath)) {
-            // Check if directory has markdown files
-            const dirFiles = fs.readdirSync(filePath);
-            const hasMarkdown = dirFiles.some(f => {
-              const fPath = path.join(filePath, f);
-              try {
-                return fs.statSync(fPath).isFile() && f.endsWith('.md') && f !== 'index.md';
-              } catch {
-                return false;
-              }
-            });
-            if (hasMarkdown) {
+            // Check if directory has content (recursively checks subdirectories)
+            if (hasContent(filePath)) {
               allPaths.push({ params: { slug: dirSlug } });
             }
           }

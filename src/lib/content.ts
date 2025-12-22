@@ -77,7 +77,7 @@ export function getAllContentPaths(): string[] {
 /**
  * Check if a directory contains markdown files (excluding index.md) or has nested subdirectories with content
  */
-function hasContent(dirPath: string): boolean {
+export function hasContent(dirPath: string): boolean {
   try {
     if (!fs.existsSync(dirPath) || !fs.statSync(dirPath).isDirectory()) {
       return false;
