@@ -181,3 +181,12 @@ html {
     scroll-behavior: auto !important;
   }
 }
+
+/* TOC Hidden Layout Rules */
+html[data-toc-hidden] .content-wrapper {
+  grid-template-columns: 1fr !important;
+}
+
+html[data-toc-hidden] .main-content {
+  grid-column: 1 !important;
+}

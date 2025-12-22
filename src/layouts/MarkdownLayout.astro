@@ -251,11 +251,62 @@ const base = import.meta.env.BASE_URL.endsWith('/')
         attributeFilter: ["data-theme"],
       });
     </script>
+
+    <!-- TOC Toggle Script -->
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', () => {
+        const toggleBtn = document.querySelector('.toc-toggle-btn');
+        const tocSidebar = document.querySelector('.toc-sidebar');
+        
+        if (!toggleBtn || !tocSidebar) return;
+
+        // Restore TOC visibility from localStorage
+        const savedVisibility = localStorage.getItem('mdvault-toc-visible');
+        const isVisible = savedVisibility === null ? true : savedVisibility === 'true';
+        
+        tocSidebar.setAttribute('data-toc-visible', String(isVisible));
+        toggleBtn.setAttribute('aria-pressed', String(!isVisible));
+        toggleBtn.setAttribute('aria-label', isVisible ? 'Hide table of contents' : 'Show table of contents');
+
+        // Update HTML attribute for layout
+        if (!isVisible) {
+          document.documentElement.setAttribute('data-toc-hidden', 'true');
+        }
+
+        // Toggle button handler
+        toggleBtn.addEventListener('click', () => {
+          const currentlyVisible = tocSidebar.getAttribute('data-toc-visible') === 'true';
+          const newVisible = !currentlyVisible;
+          
+          tocSidebar.setAttribute('data-toc-visible', String(newVisible));
+          toggleBtn.setAttribute('aria-pressed', String(!newVisible));
+          toggleBtn.setAttribute('aria-label', newVisible ? 'Hide table of contents' : 'Show table of contents');
+          
+          // Save to localStorage
+          localStorage.setItem('mdvault-toc-visible', String(newVisible));
+          
+          // Update layout
+          if (newVisible) {
+            document.documentElement.removeAttribute('data-toc-hidden');
+          } else {
+            document.documentElement.setAttribute('data-toc-hidden', 'true');
+          }
+        });
+
+        // Keyboard support
+        toggleBtn.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleBtn.click();
+          }
+        });
+      });
+    </script>
   </head>
   <body>
     <a href="#main" class="skip-link">Skip to content</a>
 
-    <Header slug={slug} />
+    <Header slug={slug} showTocToggle={toc.length > 0} />
 
     <div class="layout-container">
       <div class={`content-wrapper ${toc.length === 0 ? 'no-toc' : ''}`}>
@@ -315,6 +366,7 @@ const base = import.meta.env.BASE_URL.endsWith('/')
     gap: 1.5rem;
     flex: 1;
     align-items: flex-start;
+    transition: grid-template-columns 0.3s ease;
   }
 
   .content-wrapper.no-toc {
@@ -328,6 +380,12 @@ const base = import.meta.env.BASE_URL.endsWith('/')
     border-radius: 12px;
     border: 1px solid var(--border-primary);
     box-shadow: var(--shadow-sm);
+    position: relative;
+    grid-column: 2;
+  }
+
+  .content-wrapper.no-toc .main-content {
+    grid-column: 1;
   }
 
   /* Custom scrollbar for main content */

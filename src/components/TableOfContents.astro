@@ -22,31 +22,53 @@ function renderTOCItem(item: TOCItem) {
       class="toc-sidebar"
       role="complementary"
       aria-label="Table of contents"
+      data-toc-visible="true"
     >
       <nav class="toc">
         <div class="toc-header">
-          <Icon name="list-bullet" size="md" class="toc-header-icon" />
-          <h2 class="toc-title">Contents</h2>
+          <div class="toc-header-title-wrapper">
+            <Icon name="list-bullet" size="md" class="toc-header-icon" />
+            <h2 class="toc-title">Contents</h2>
+          </div>
+          <div class="toc-filter-wrapper">
+            <div class="toc-filter-input-wrapper">
+              <svg class="toc-filter-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15 15L11.5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <input
+                type="text"
+                class="toc-filter-input"
+                placeholder="Filter sections..."
+                aria-label="Filter table of contents"
+              />
+              <button class="toc-filter-clear" aria-label="Clear filter" type="button" style="display: none;">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
         <ul class="toc-list">
           {toc.map((item) => {
             const tocItem = renderTOCItem(item);
             return (
-              <li class="toc-item">
+              <li class="toc-item" data-toc-text={item.text.toLowerCase()}>
                 <a href={`#${item.id}`} class="toc-link" data-toc-id={item.id}>
                   {item.text}
                 </a>
                 {tocItem.hasChildren && (
                   <ul class="toc-list toc-nested">
                     {item.children.map((child) => (
-                      <li class="toc-item">
+                      <li class="toc-item" data-toc-text={child.text.toLowerCase()}>
                         <a href={`#${child.id}`} class="toc-link" data-toc-id={child.id}>
                           {child.text}
                         </a>
                         {child.children && child.children.length > 0 && (
                           <ul class="toc-list toc-nested">
                             {child.children.map((grandchild) => (
-                              <li class="toc-item">
+                              <li class="toc-item" data-toc-text={grandchild.text.toLowerCase()}>
                                 <a href={`#${grandchild.id}`} class="toc-link" data-toc-id={grandchild.id}>
                                   {grandchild.text}
                                 </a>
@@ -62,6 +84,9 @@ function renderTOCItem(item: TOCItem) {
             );
           })}
         </ul>
+        <div class="toc-no-results" style="display: none;">
+          <p>No matching sections</p>
+        </div>
       </nav>
     </aside>
   )
@@ -80,16 +105,92 @@ function renderTOCItem(item: TOCItem) {
     box-shadow: var(--shadow-sm);
     max-height: calc(100vh - 3rem);
     overflow: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .toc-sidebar[data-toc-visible="false"] {
+    display: none;
   }
 
   .toc-header {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    flex-direction: column;
+    gap: 0.75rem;
     margin-bottom: 1rem;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--border-primary);
     flex-shrink: 0;
+  }
+
+  .toc-header-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .toc-filter-wrapper {
+    width: 100%;
+  }
+
+  .toc-filter-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .toc-filter-icon {
+    position: absolute;
+    left: 0.625rem;
+    color: var(--text-tertiary);
+    pointer-events: none;
+  }
+
+  .toc-filter-input {
+    width: 100%;
+    padding: 0.5rem 2rem 0.5rem 2rem;
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.8125rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .toc-filter-input::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  .toc-filter-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .toc-filter-clear {
+    position: absolute;
+    right: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .toc-filter-clear:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+  }
+
+  .toc-filter-clear:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 1px;
   }
 
   .toc {
@@ -105,6 +206,21 @@ function renderTOCItem(item: TOCItem) {
     flex: 1;
     margin: 0;
     padding: 0;
+  }
+
+  .toc-no-results {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+
+  .toc-no-results p {
+    margin: 0;
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
   }
 
   .toc-header-icon {
@@ -184,6 +300,110 @@ function renderTOCItem(item: TOCItem) {
 </style>
 
 <script>
+  // TOC Filter functionality
+  (function initTOCControls() {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initTOCControls);
+      return;
+    }
+
+    const filterInput = document.querySelector('.toc-filter-input');
+    const clearBtn = document.querySelector('.toc-filter-clear');
+    const tocItems = document.querySelectorAll('.toc-item');
+    const tocList = document.querySelector('.toc-list');
+    const noResults = document.querySelector('.toc-no-results');
+
+    if (!filterInput) return;
+
+    // Filter functionality
+    function filterTOC(searchText) {
+      const query = searchText.toLowerCase().trim();
+      
+      if (!query) {
+        // Show all items
+        tocItems.forEach(item => {
+          item.style.display = '';
+        });
+        if (tocList) tocList.style.display = '';
+        if (noResults) noResults.style.display = 'none';
+        return;
+      }
+
+      let hasVisibleItems = false;
+
+      // First pass: mark items that match
+      tocItems.forEach(item => {
+        const text = item.getAttribute('data-toc-text') || '';
+        const matches = text.includes(query);
+        item.setAttribute('data-matches', String(matches));
+        item.setAttribute('data-visible', 'false');
+      });
+
+      // Second pass: show matching items and their parents
+      tocItems.forEach(item => {
+        const matches = item.getAttribute('data-matches') === 'true';
+        
+        if (matches) {
+          // Show this item
+          item.setAttribute('data-visible', 'true');
+          item.style.display = '';
+          hasVisibleItems = true;
+          
+          // Show all parent items
+          let parent = item.parentElement;
+          while (parent) {
+            if (parent.classList.contains('toc-item')) {
+              parent.setAttribute('data-visible', 'true');
+              parent.style.display = '';
+            }
+            parent = parent.parentElement;
+          }
+        }
+      });
+
+      // Third pass: hide items that aren't visible and don't have visible children
+      tocItems.forEach(item => {
+        const isVisible = item.getAttribute('data-visible') === 'true';
+        
+        if (!isVisible) {
+          // Check if any descendant is visible
+          const hasVisibleDescendant = item.querySelector('[data-visible="true"]') !== null;
+          
+          if (hasVisibleDescendant) {
+            item.style.display = '';
+          } else {
+            item.style.display = 'none';
+          }
+        }
+      });
+
+      // Show/hide no results message
+      if (tocList) tocList.style.display = hasVisibleItems ? '' : 'none';
+      if (noResults) noResults.style.display = hasVisibleItems ? 'none' : 'flex';
+    }
+
+    // Filter input handler
+    filterInput.addEventListener('input', (e) => {
+      const value = e.target.value;
+      filterTOC(value);
+      
+      // Show/hide clear button
+      if (clearBtn) {
+        clearBtn.style.display = value ? 'flex' : 'none';
+      }
+    });
+
+    // Clear button handler
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        filterInput.value = '';
+        filterTOC('');
+        clearBtn.style.display = 'none';
+        filterInput.focus();
+      });
+    }
+  })();
+
   (function initTOCScrollSync() {
     // Wait for DOM to be ready
     if (document.readyState === 'loading') {
